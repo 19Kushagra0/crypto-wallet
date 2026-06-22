@@ -1,0 +1,449 @@
+/* =====================================================
+   Dashboard – CSS Module
+   Matches the project's light-theme design system.
+   All color references use CSS custom properties.
+   ===================================================== */
+
+.main {
+  flex-grow: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  box-sizing: border-box;
+  font-family: Inter, sans-serif;
+}
+
+@media screen and (min-width: 768px) {
+  .main {
+    padding: 3rem 2rem;
+  }
+}
+
+/* ── Hero Section ── */
+.hero {
+  background-color: var(--color-ink, #171717);
+  background-image: 
+    radial-gradient(at 80% 0%, rgba(100, 150, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(200, 100, 255, 0.15) 0px, transparent 50%);
+  color: var(--color-canvas, #ffffff);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media screen and (min-width: 768px) {
+  .hero {
+    padding: 3rem;
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.heroLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.heroBalance {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  margin: 0;
+  line-height: 1;
+}
+
+@media screen and (min-width: 768px) {
+  .heroBalance {
+    font-size: 4rem;
+  }
+}
+
+.heroChange {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.2), transparent);
+  pointer-events: none;
+}
+
+/* ── Dashboard Grid ── */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media screen and (min-width: 1024px) {
+  .dashboardGrid {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+
+/* ── Actions Column (Left) ── */
+.actionsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media screen and (min-width: 1024px) {
+  .actionsColumn {
+    grid-column: span 3;
+  }
+}
+
+.actionBtn {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.actionBtn:hover {
+  border-color: var(--color-hairline-strong);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.actionBtnLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.actionBtnIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-container);
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover .actionBtnIcon {
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+}
+
+.actionBtnText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* ── Activity Column (Middle) ── */
+.activityColumn {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+@media screen and (min-width: 1024px) {
+  .activityColumn {
+    grid-column: span 5;
+  }
+}
+
+.activityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.activityTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.activityViewAll {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  color: var(--color-mute);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.activityViewAll:hover {
+  color: var(--color-ink);
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.activityItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.activityIconBox {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-container);
+  color: var(--color-mute);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activityMainText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.activitySubText {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  color: var(--color-mute);
+}
+
+.activityItemRight {
+  text-align: right;
+}
+
+.activityAmount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.activityDivider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-hairline);
+}
+
+/* ── Assets Column (Right) ── */
+.assetsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media screen and (min-width: 1024px) {
+  .assetsColumn {
+    grid-column: span 4;
+  }
+}
+
+/* Wallet Card */
+.walletCard {
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.walletCardGlow {
+  position: absolute;
+  right: -1rem;
+  top: -1rem;
+  width: 6rem;
+  height: 6rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.walletCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.walletCardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.walletCardCopy {
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.walletCardCopy:hover {
+  color: var(--color-canvas);
+}
+
+.walletCardAddress {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  word-break: break-all;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.75rem;
+}
+
+.qrContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.qrBox {
+  width: 8rem;
+  height: 8rem;
+  background-color: var(--color-canvas);
+  border-radius: 0.25rem;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Asset Overview */
+.assetOverview {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+
+.assetOverviewTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-hairline);
+  margin-top: 0;
+}
+
+.assetList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.assetRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.assetName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.assetPercent {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+
+.assetBarTrack {
+  width: 100%;
+  background-color: var(--color-surface-container);
+  height: 0.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.assetBarFill {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.assetEth { background-color: #627eea; }
+.assetBtc { background-color: #f7931a; }
+.assetUsdc { background-color: #2775ca; }
+
+/* ── Bottom Nav (Mobile) ── */
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: var(--color-canvas);
+  border-top: 1px solid var(--color-hairline);
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 4rem;
+  padding: 0 1.5rem;
+}
+
+@media screen and (min-width: 768px) {
+  .bottomNav {
+    display: none;
+  }
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-mute);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.navItem:hover {
+  color: var(--color-ink);
+}
+
+.navItemActive {
+  color: var(--color-ink);
+  transform: scale(1.1);
+}
