@@ -81,8 +81,10 @@ export default function ImportWallet({ onBack, onComplete }) {
           {/* Contextual Side Information */}
           <div className={styles.infoSection}>
             <div className={styles.infoBlock}>
-              <div className={styles.iconBox}>
-                <Key size={20} />
+              <div className={styles.iconWrapper}>
+                <div className={styles.iconBox}>
+                  <Key size={20} />
+                </div>
               </div>
               <h3 className={styles.infoTitle}>
                 Your Keys, Your Crypto
@@ -94,8 +96,10 @@ export default function ImportWallet({ onBack, onComplete }) {
             </div>
             <div className={styles.divider} />
             <div className={styles.infoBlock}>
-              <div className={styles.iconBox}>
-                <Shield size={20} />
+              <div className={styles.iconWrapper}>
+                <div className={styles.iconBox}>
+                  <Shield size={20} />
+                </div>
               </div>
               <h3 className={styles.infoTitle}>
                 Keep It Safe
