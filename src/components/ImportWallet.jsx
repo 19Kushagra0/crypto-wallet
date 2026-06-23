@@ -2,17 +2,24 @@
 
 import { useState } from "react";
 import { useWallet } from "../context/WalletContext";
-import { Key, Shield } from "lucide-react";
+import { ethers } from "ethers";
+import { Key, Shield, AlertTriangle, ArrowRight } from "lucide-react";
 import styles from "../styles/ImportWallet.module.css";
 
 export default function ImportWallet({ onBack, onComplete }) {
+  const [step, setStep] = useState("import"); // 'import' | 'password'
+  const [tempWallet, setTempWallet] = useState(null);
   const [input, setInput] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const { importWalletFromMnemonic } = useWallet();
+  const [isEncrypting, setIsEncrypting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const { encryptAndSaveWallet } = useWallet();
+
+  const handleMnemonicSubmit = (e) => {
     e.preventDefault();
-    const trimmed = input.trim();
+    const trimmed = input.trim().toLowerCase();
     if (!trimmed) return;
 
     const words = trimmed.split(/\s+/);
@@ -22,20 +29,163 @@ export default function ImportWallet({ onBack, onComplete }) {
     }
 
     try {
-      importWalletFromMnemonic(trimmed);
+      if (!ethers.Mnemonic.isValidMnemonic(trimmed)) {
+        throw new Error("Invalid mnemonic recovery phrase checksum.");
+      }
+      const wallet = ethers.Wallet.fromPhrase(trimmed);
+      setTempWallet(wallet);
       setError("");
-      onComplete();
+      setStep("password");
     } catch (err) {
       setError(err.message || "Invalid mnemonic recovery phrase.");
     }
   };
 
-  return (
-    <div>
-      {/* TopAppBar Semantic Shell: Linear/Transactional Intent -> Suppressed */}
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setIsEncrypting(true);
+    setError("");
+
+    // Timeout allows DOM state to update and render spinner before CPU-heavy scrypt runs
+    setTimeout(async () => {
+      try {
+        await encryptAndSaveWallet(tempWallet, password);
+        onComplete();
+      } catch (err) {
+        console.error(err);
+        setError("Failed to encrypt and import wallet. Please try again.");
+        setIsEncrypting(false);
+      }
+    }, 100);
+  };
+
+  if (isEncrypting) {
+    return (
+      <div className={styles.main} style={{ justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem", textAlign: "center" }}>
+          <div style={{
+            width: "3.5rem",
+            height: "3.5rem",
+            border: "3px solid var(--color-hairline)",
+            borderTopColor: "var(--color-ink)",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite"
+          }} />
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "var(--color-ink)", margin: 0 }}>Importing Your Wallet</h2>
+          <p style={{ color: "var(--color-body-text)", maxWidth: "300px", margin: 0, fontSize: "0.9rem", lineHeight: "1.5" }}>
+            Encrypting and securing your private keys. This will take a few seconds...
+          </p>
+        </div>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (step === "password") {
+    return (
       <main className={styles.main}>
         <div className={styles.card}>
-          {/* Main Form Area */}
+          <div className={styles.formSection}>
+            <div className={styles.header}>
+              <h1 className={styles.title}>Secure Your Wallet</h1>
+              <p className={styles.description}>
+                Create a password to encrypt this wallet on your device. Aura cannot recover this password for you.
+              </p>
+            </div>
+
+            <form className={styles.form} onSubmit={handlePasswordSubmit}>
+              <div className={styles.inputGroup}>
+                <label className={styles.label} htmlFor="new-password">
+                  Password (min. 8 characters)
+                </label>
+                <input
+                  id="new-password"
+                  className={styles.textarea}
+                  style={{ height: "auto", padding: "0.875rem 1rem", fontSize: "0.95rem" }}
+                  type="password"
+                  placeholder="Enter secure password"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                  required
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label} htmlFor="confirm-password">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirm-password"
+                  className={styles.textarea}
+                  style={{ height: "auto", padding: "0.875rem 1rem", fontSize: "0.95rem" }}
+                  type="password"
+                  placeholder="Repeat your password"
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setError(""); }}
+                  required
+                />
+              </div>
+
+              {error && (
+                <p style={{ color: "red", fontSize: "0.825rem", margin: "0.5rem 0 0" }}>
+                  {error}
+                </p>
+              )}
+
+              <div className={styles.actions}>
+                <button
+                  className={styles.btnCancel}
+                  type="button"
+                  onClick={() => { setStep("import"); setError(""); }}
+                >
+                  Back
+                </button>
+                <button
+                  className={styles.btnSubmit}
+                  type="submit"
+                  disabled={!password || !confirmPassword}
+                >
+                  Import Wallet
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div className={styles.infoSection}>
+            <div className={styles.infoBlock}>
+              <div className={styles.iconWrapper}>
+                <div className={styles.iconBox}>
+                  <AlertTriangle size={20} style={{ color: "#eab308" }} />
+                </div>
+              </div>
+              <h3 className={styles.infoTitle}>Password Recovery</h3>
+              <p className={styles.infoText}>
+                If you forget this password, the only way to recover your wallet is using your 12-word seed phrase. Write it down!
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <div>
+      <main className={styles.main}>
+        <div className={styles.card}>
           <div className={styles.formSection}>
             <div className={styles.header}>
               <h1 className={styles.title}>Import Wallet</h1>
@@ -44,7 +194,7 @@ export default function ImportWallet({ onBack, onComplete }) {
                 to your account.
               </p>
             </div>
-            <form className={styles.form} onSubmit={handleSubmit}>
+            <form className={styles.form} onSubmit={handleMnemonicSubmit}>
               <div className={styles.inputGroup}>
                 <label className={styles.label} htmlFor="recovery-phrase">
                   Recovery Phrase
@@ -85,12 +235,12 @@ export default function ImportWallet({ onBack, onComplete }) {
                   type="submit"
                   disabled={!input.trim()}
                 >
-                  Import Wallet
+                  Continue
                 </button>
               </div>
             </form>
           </div>
-          {/* Contextual Side Information */}
+
           <div className={styles.infoSection}>
             <div className={styles.infoBlock}>
               <div className={styles.iconWrapper}>
@@ -120,7 +270,6 @@ export default function ImportWallet({ onBack, onComplete }) {
           </div>
         </div>
       </main>
-      {/* Footer Semantic Shell: Linear/Transactional Intent -> Rendered for legal links but simplified */}
     </div>
   );
 }
