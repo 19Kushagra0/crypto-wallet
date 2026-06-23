@@ -25,7 +25,9 @@ import {
 } from "lucide-react";
 import styles from "../styles/Dashboard.module.css";
 import { getSwapQuote } from "../utils/swapHelper";
-import QRScanner from "./QRScanner";
+import dynamic from "next/dynamic";
+
+const QRScanner = dynamic(() => import("./QRScanner"), { ssr: false });
 
 const POPULAR_TOKENS = [
   { symbol: "WETH", name: "Wrapped Ether", color: "#627EEA", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", decimals: 18 },
