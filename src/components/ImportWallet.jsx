@@ -1,26 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import { useWallet } from "../context/WalletContext";
 import { Key, Shield } from "lucide-react";
 import styles from "../styles/ImportWallet.module.css";
 
 export default function ImportWallet({ onBack, onComplete }) {
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
+  const { importWalletFromMnemonic } = useWallet();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed) return;
-    
+
     const words = trimmed.split(/\s+/);
     if (![12, 18, 24].includes(words.length)) {
       setError("Recovery phrase must be exactly 12, 18, or 24 words.");
       return;
     }
-    
-    setError("");
-    onComplete();
+
+    try {
+      importWalletFromMnemonic(trimmed);
+      setError("");
+      onComplete();
+    } catch (err) {
+      setError(err.message || "Invalid mnemonic recovery phrase.");
+    }
   };
 
   return (
@@ -31,9 +38,7 @@ export default function ImportWallet({ onBack, onComplete }) {
           {/* Main Form Area */}
           <div className={styles.formSection}>
             <div className={styles.header}>
-              <h1 className={styles.title}>
-                Import Wallet
-              </h1>
+              <h1 className={styles.title}>Import Wallet</h1>
               <p className={styles.description}>
                 Paste your 12, 18, or 24-word recovery phrase to restore access
                 to your account.
@@ -41,10 +46,7 @@ export default function ImportWallet({ onBack, onComplete }) {
             </div>
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.inputGroup}>
-                <label
-                  className={styles.label}
-                  htmlFor="recovery-phrase"
-                >
+                <label className={styles.label} htmlFor="recovery-phrase">
                   Recovery Phrase
                 </label>
                 <textarea
@@ -58,7 +60,17 @@ export default function ImportWallet({ onBack, onComplete }) {
                     if (error) setError("");
                   }}
                 />
-                {error && <p style={{ color: "red", fontSize: "0.875rem", marginTop: "0.5rem" }}>{error}</p>}
+                {error && (
+                  <p
+                    style={{
+                      color: "red",
+                      fontSize: "0.875rem",
+                      marginTop: "0.5rem",
+                    }}
+                  >
+                    {error}
+                  </p>
+                )}
               </div>
               <div className={styles.actions}>
                 <button
@@ -86,9 +98,7 @@ export default function ImportWallet({ onBack, onComplete }) {
                   <Key size={20} />
                 </div>
               </div>
-              <h3 className={styles.infoTitle}>
-                Your Keys, Your Crypto
-              </h3>
+              <h3 className={styles.infoTitle}>Your Keys, Your Crypto</h3>
               <p className={styles.infoText}>
                 Aura is a non-custodial wallet. We never have access to your
                 funds, private keys, or recovery phrase.
@@ -101,9 +111,7 @@ export default function ImportWallet({ onBack, onComplete }) {
                   <Shield size={20} />
                 </div>
               </div>
-              <h3 className={styles.infoTitle}>
-                Keep It Safe
-              </h3>
+              <h3 className={styles.infoTitle}>Keep It Safe</h3>
               <p className={styles.infoText}>
                 Anyone with your recovery phrase can access your funds. Never
                 share it with anyone, including Aura support.

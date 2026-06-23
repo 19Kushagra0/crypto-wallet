@@ -1,4 +1,5 @@
 import "./globals.css";
+import { WalletProvider } from "../context/WalletContext";
 
 export const metadata = {
   title: "Aura Wallet",
@@ -9,7 +10,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="light">
       <body className="antialiased min-h-screen">
-        {children}
+        <WalletProvider>
+          {children}
+        </WalletProvider>
       </body>
     </html>
   );
