@@ -50,6 +50,10 @@ export default function Dashboard({ onLogout }) {
   const [activityPage, setActivityPage] = useState(1);
   const [assetPage, setAssetPage] = useState(1);
 
+  const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
+  const [activityPage, setActivityPage] = useState(1);
+  const [assetPage, setAssetPage] = useState(1);
+
   const [transactions, setTransactions] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [activeAssetTab, setActiveAssetTab] = useState("tokens"); // 'tokens' | 'nfts'
@@ -445,6 +449,20 @@ export default function Dashboard({ onLogout }) {
                 </div>
                 <span className={styles.actionBtnText}>Swap</span>
               </div>
+              <span style={{
+                position: "absolute",
+                top: "-5px",
+                right: "-5px",
+                backgroundColor: "var(--color-primary)",
+                color: "var(--color-surface)",
+                fontSize: "0.65rem",
+                padding: "0.15rem 0.4rem",
+                borderRadius: "1rem",
+                fontWeight: "600",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+              }}>
+                Soon
+              </span>
             </button>
           </div>
 
