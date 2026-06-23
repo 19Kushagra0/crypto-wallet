@@ -161,6 +161,28 @@
   color: var(--color-ink);
 }
 
+.actionBtnWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.soonBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 /* ── Activity Column (Middle) ── */
 .activityColumn {
   background-color: var(--color-canvas);
