@@ -10,6 +10,7 @@ export default function UnlockWallet() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isDecrypting, setIsDecrypting] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const { unlockWallet, deleteWallet } = useWallet();
   const router = useRouter();
@@ -35,13 +36,12 @@ export default function UnlockWallet() {
   };
 
   const handleResetWallet = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to reset your wallet? This will permanently delete your keys from this device. You can only restore access using your 12-word recovery phrase."
-    );
-    if (confirmed) {
-      deleteWallet();
-      router.push("/");
-    }
+    setIsResetModalOpen(true);
+  };
+
+  const confirmReset = () => {
+    deleteWallet();
+    router.push("/");
   };
 
   if (isDecrypting) {
@@ -72,6 +72,37 @@ export default function UnlockWallet() {
 
   return (
     <main className={styles.main} style={{ justifyContent: "center", alignItems: "center" }}>
+      {/* Reset Confirmation Modal */}
+      {isResetModalOpen && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+          <div style={{ backgroundColor: "var(--color-canvas)", borderRadius: "1rem", padding: "2rem", maxWidth: "400px", width: "100%", boxShadow: "0 10px 25px rgba(0,0,0,0.1)", border: "1px solid var(--color-hairline)" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+              <div style={{ width: "3rem", height: "3rem", borderRadius: "50%", backgroundColor: "rgba(239, 68, 68, 0.1)", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ShieldAlert size={24} />
+              </div>
+            </div>
+            <h2 style={{ textAlign: "center", margin: "0 0 1rem 0", fontSize: "1.25rem", color: "var(--color-primary)" }}>Reset Wallet</h2>
+            <p style={{ textAlign: "center", margin: "0 0 1.5rem 0", color: "var(--color-body-text)", fontSize: "0.95rem", lineHeight: 1.5 }}>
+              Are you sure you want to reset your wallet? This will <strong>permanently delete</strong> your keys from this device. You can only restore access using your 12-word recovery phrase.
+            </p>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button 
+                onClick={() => setIsResetModalOpen(false)}
+                style={{ flex: 1, padding: "0.75rem", backgroundColor: "var(--color-surface-container)", color: "var(--color-ink)", border: "1px solid var(--color-hairline)", borderRadius: "0.5rem", fontWeight: "600", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmReset}
+                style={{ flex: 1, padding: "0.75rem", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "600", cursor: "pointer" }}
+              >
+                Yes, Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.card} style={{ maxWidth: "480px", gridTemplateColumns: "1fr" }}>
         <div className={styles.formSection}>
           <div className={styles.header} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
@@ -132,20 +163,9 @@ export default function UnlockWallet() {
               <button
                 type="button"
                 onClick={handleResetWallet}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "var(--color-error, #ef4444)",
-                  fontSize: "0.825rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.375rem",
-                  marginTop: "0.5rem"
-                }}
+                className={styles.btnReset}
               >
-                <ShieldAlert size={14} />
+                <ShieldAlert size={16} />
                 Reset Wallet (Lose Current Keys)
               </button>
             </div>
