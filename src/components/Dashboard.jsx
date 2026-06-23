@@ -52,10 +52,6 @@ export default function Dashboard({ onLogout }) {
   const [activityPage, setActivityPage] = useState(1);
   const [assetPage, setAssetPage] = useState(1);
 
-  const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
-  const [activityPage, setActivityPage] = useState(1);
-  const [assetPage, setAssetPage] = useState(1);
-
   const [transactions, setTransactions] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [activeAssetTab, setActiveAssetTab] = useState("tokens"); // 'tokens' | 'nfts'
