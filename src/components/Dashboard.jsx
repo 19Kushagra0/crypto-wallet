@@ -26,7 +26,7 @@ import styles from "../styles/Dashboard.module.css";
 
 export default function Dashboard({ onLogout }) {
   const [copied, setCopied] = useState(false);
-  const { address, balance, wallet, provider } = useWallet();
+  const { address, balance, wallet, provider, currentNetwork } = useWallet();
 
   // Send transaction modal states
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
@@ -35,6 +35,10 @@ export default function Dashboard({ onLogout }) {
   const [txStatus, setTxStatus] = useState("idle"); // 'idle' | 'loading' | 'success' | 'error'
   const [txHash, setTxHash] = useState("");
   const [txError, setTxError] = useState("");
+
+  const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
+  const [activityPage, setActivityPage] = useState(1);
+  const [assetPage, setAssetPage] = useState(1);
 
   const [transactions, setTransactions] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -52,36 +56,44 @@ export default function Dashboard({ onLogout }) {
       ];
 
       try {
-        const usdcContract = new ethers.Contract("0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", ERC20_ABI, provider);
-        const usdcBal = await usdcContract.balanceOf(address);
-        const usdcDecimals = await usdcContract.decimals();
-        setUsdcBalance(ethers.formatUnits(usdcBal, usdcDecimals));
+        if (currentNetwork?.chainId === "0xaa36a7") {
+          const usdcContract = new ethers.Contract("0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", ERC20_ABI, provider);
+          const usdcBal = await usdcContract.balanceOf(address);
+          const usdcDecimals = await usdcContract.decimals();
+          setUsdcBalance(ethers.formatUnits(usdcBal, usdcDecimals));
+        } else {
+          setUsdcBalance("0.00");
+        }
       } catch (err) {
         console.log("Could not fetch USDC balance");
       }
 
       try {
-        const wbtcContract = new ethers.Contract("0x8a556858e805540aC668A6b6de162A4BB9a85Fbb", ERC20_ABI, provider);
-        const wbtcBal = await wbtcContract.balanceOf(address);
-        const wbtcDecimals = await wbtcContract.decimals();
-        setBtcBalance(ethers.formatUnits(wbtcBal, wbtcDecimals));
+        if (currentNetwork?.chainId === "0xaa36a7") {
+          const wbtcContract = new ethers.Contract("0x8a556858e805540aC668A6b6de162A4BB9a85Fbb", ERC20_ABI, provider);
+          const wbtcBal = await wbtcContract.balanceOf(address);
+          const wbtcDecimals = await wbtcContract.decimals();
+          setBtcBalance(ethers.formatUnits(wbtcBal, wbtcDecimals));
+        } else {
+          setBtcBalance("0.0000");
+        }
       } catch (err) {
         console.log("Could not fetch WBTC balance");
       }
     };
 
     fetchTokens();
-  }, [address, provider]);
+  }, [address, provider, currentNetwork]);
 
   // Fetch transaction history
   useEffect(() => {
-    if (!address) return;
+    if (!address || !currentNetwork?.explorerApiUrl) return;
 
     let isMounted = true;
     const fetchHistory = async () => {
       setIsLoadingHistory(true);
       try {
-        const res = await fetch(`https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=5&sort=desc`);
+        const res = await fetch(`${currentNetwork?.explorerApiUrl}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=${activityPage}&offset=10&sort=desc`);
         const data = await res.json();
         
         if (data.status === "1" && isMounted) {
@@ -90,7 +102,7 @@ export default function Dashboard({ onLogout }) {
           setTransactions([]);
         }
       } catch (err) {
-        console.error("Failed to fetch history:", err);
+        console.warn("Failed to fetch history (often due to CORS or rate limiting without API key):", err);
       } finally {
         if (isMounted) setIsLoadingHistory(false);
       }
@@ -101,7 +113,7 @@ export default function Dashboard({ onLogout }) {
     return () => {
       isMounted = false;
     };
-  }, [address]);
+  }, [address, activityPage, currentNetwork]);
 
   const isMockWallet = !wallet;
 
@@ -189,7 +201,7 @@ export default function Dashboard({ onLogout }) {
             <h1 className={styles.heroBalance}>${balanceUSD}</h1>
             <div className={styles.heroChange}>
               <TrendingUp size={16} />
-              <span>{balance || "0.0000"} ETH (Sepolia Testnet)</span>
+              <span>{balance || "0.0000"} {currentNetwork?.symbol} ({currentNetwork?.name})</span>
             </div>
           </div>
           {/* Decorative atmospheric elements */}
@@ -208,7 +220,7 @@ export default function Dashboard({ onLogout }) {
                 <span className={styles.actionBtnText}>Send</span>
               </div>
             </button>
-            <button className={styles.actionBtn}>
+            <button onClick={() => setIsReceiveModalOpen(true)} className={styles.actionBtn}>
               <div className={styles.actionBtnLeft}>
                 <div className={styles.actionBtnIcon}>
                   <ArrowDown size={20} />
@@ -216,13 +228,31 @@ export default function Dashboard({ onLogout }) {
                 <span className={styles.actionBtnText}>Receive</span>
               </div>
             </button>
-            <button className={styles.actionBtn}>
+            <button 
+              onClick={() => alert("Swap functionality is coming in Phase 8!")} 
+              className={styles.actionBtn}
+              style={{ position: "relative" }}
+            >
               <div className={styles.actionBtnLeft}>
                 <div className={styles.actionBtnIcon}>
                   <ArrowRightLeft size={20} />
                 </div>
                 <span className={styles.actionBtnText}>Swap</span>
               </div>
+              <span style={{
+                position: "absolute",
+                top: "-5px",
+                right: "-5px",
+                backgroundColor: "var(--color-primary)",
+                color: "var(--color-surface)",
+                fontSize: "0.65rem",
+                padding: "0.15rem 0.4rem",
+                borderRadius: "1rem",
+                fontWeight: "600",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+              }}>
+                Soon
+              </span>
             </button>
           </div>
 
@@ -230,7 +260,6 @@ export default function Dashboard({ onLogout }) {
           <div className={styles.activityColumn}>
             <div className={styles.activityHeader}>
               <h2 className={styles.activityTitle}>Recent Activity</h2>
-              <button className={styles.activityViewAll}>View All</button>
             </div>
             <div className={styles.activityList}>
               {isLoadingHistory ? (
@@ -266,7 +295,7 @@ export default function Dashboard({ onLogout }) {
                         </div>
                         <div className={styles.activityItemRight}>
                           <div className={styles.activityAmount} style={{ color: isReceive ? 'var(--color-ink)' : 'inherit' }}>
-                            {isReceive ? '+' : '-'}{valueEth} ETH
+                            {isReceive ? '+' : '-'}{valueEth} {currentNetwork?.symbol || 'ETH'}
                           </div>
                           <div className={styles.activitySubText}>
                             {isToday ? `Today, ${timeString}` : `${dateString}, ${timeString}`}
@@ -283,6 +312,25 @@ export default function Dashboard({ onLogout }) {
                   <span style={{ fontSize: "0.9rem" }}>No recent activity</span>
                 </div>
               )}
+              
+              {/* Pagination Controls */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 0 0 0", marginTop: "auto" }}>
+                <button 
+                  onClick={() => setActivityPage(p => Math.max(1, p - 1))}
+                  disabled={activityPage === 1}
+                  style={{ background: "none", border: "1px solid var(--color-hairline)", color: "var(--color-ink)", padding: "0.4rem 0.8rem", borderRadius: "0.5rem", cursor: activityPage === 1 ? "not-allowed" : "pointer", opacity: activityPage === 1 ? 0.5 : 1, fontSize: "0.85rem" }}
+                >
+                  Previous
+                </button>
+                <span style={{ fontSize: "0.85rem", color: "var(--color-mute)" }}>Page {activityPage}</span>
+                <button 
+                  onClick={() => setActivityPage(p => p + 1)}
+                  disabled={transactions.length < 10}
+                  style={{ background: "none", border: "1px solid var(--color-hairline)", color: "var(--color-ink)", padding: "0.4rem 0.8rem", borderRadius: "0.5rem", cursor: transactions.length < 10 ? "not-allowed" : "pointer", opacity: transactions.length < 10 ? 0.5 : 1, fontSize: "0.85rem" }}
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
 
@@ -313,43 +361,60 @@ export default function Dashboard({ onLogout }) {
             <div className={styles.assetOverview}>
               <h3 className={styles.assetOverviewTitle}>Asset Overview</h3>
               <div className={styles.assetList}>
-                <div className={styles.assetRow}>
-                  <span className={styles.assetName}>Ethereum (ETH)</span>
-                  <span className={styles.assetPercent}>{ethPercent}%</span>
-                </div>
-                <div className={styles.assetBarTrack}>
-                  <div
-                    className={`${styles.assetBarFill} ${styles.assetEth}`}
-                    style={{ width: `${ethPercent}%` }}
-                  />
-                </div>
+                {assetPage === 1 && (
+                  <>
+                    <div className={styles.assetRow}>
+                      <span className={styles.assetName}>Ethereum (ETH)</span>
+                      <span className={styles.assetPercent}>{ethPercent}%</span>
+                    </div>
+                    <div className={styles.assetBarTrack}>
+                      <div
+                        className={`${styles.assetBarFill} ${styles.assetEth}`}
+                        style={{ width: `${ethPercent}%` }}
+                      />
+                    </div>
 
-                <div
-                  className={styles.assetRow}
-                  style={{ marginTop: "0.5rem" }}
-                >
-                  <span className={styles.assetName}>Bitcoin (BTC)</span>
-                  <span className={styles.assetPercent}>{btcPercent}%</span>
-                </div>
-                <div className={styles.assetBarTrack}>
-                  <div
-                    className={`${styles.assetBarFill} ${styles.assetBtc}`}
-                    style={{ width: `${btcPercent}%` }}
-                  />
-                </div>
+                    <div className={styles.assetRow} style={{ marginTop: "0.5rem" }}>
+                      <span className={styles.assetName}>Bitcoin (BTC)</span>
+                      <span className={styles.assetPercent}>{btcPercent}%</span>
+                    </div>
+                    <div className={styles.assetBarTrack}>
+                      <div
+                        className={`${styles.assetBarFill} ${styles.assetBtc}`}
+                        style={{ width: `${btcPercent}%` }}
+                      />
+                    </div>
 
-                <div
-                  className={styles.assetRow}
-                  style={{ marginTop: "0.5rem" }}
-                >
-                  <span className={styles.assetName}>USD Coin (USDC)</span>
-                  <span className={styles.assetPercent}>{usdcPercent}%</span>
-                </div>
-                <div className={styles.assetBarTrack}>
-                  <div
-                    className={`${styles.assetBarFill} ${styles.assetUsdc}`}
-                    style={{ width: `${usdcPercent}%` }}
-                  />
+                    <div className={styles.assetRow} style={{ marginTop: "0.5rem" }}>
+                      <span className={styles.assetName}>USD Coin (USDC)</span>
+                      <span className={styles.assetPercent}>{usdcPercent}%</span>
+                    </div>
+                    <div className={styles.assetBarTrack}>
+                      <div
+                        className={`${styles.assetBarFill} ${styles.assetUsdc}`}
+                        style={{ width: `${usdcPercent}%` }}
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {/* Pagination Controls */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "1rem", marginTop: "1rem", borderTop: "1px solid var(--color-hairline)" }}>
+                  <button 
+                    onClick={() => setAssetPage(p => Math.max(1, p - 1))}
+                    disabled={assetPage === 1}
+                    style={{ background: "none", border: "1px solid var(--color-hairline)", color: "var(--color-ink)", padding: "0.4rem 0.8rem", borderRadius: "0.5rem", cursor: assetPage === 1 ? "not-allowed" : "pointer", opacity: assetPage === 1 ? 0.5 : 1, fontSize: "0.8rem" }}
+                  >
+                    Previous
+                  </button>
+                  <span style={{ fontSize: "0.8rem", color: "var(--color-mute)" }}>Page {assetPage}</span>
+                  <button 
+                    onClick={() => setAssetPage(p => p + 1)}
+                    disabled={true}
+                    style={{ background: "none", border: "1px solid var(--color-hairline)", color: "var(--color-ink)", padding: "0.4rem 0.8rem", borderRadius: "0.5rem", cursor: "not-allowed", opacity: 0.5, fontSize: "0.8rem" }}
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
             </div>
@@ -377,7 +442,7 @@ export default function Dashboard({ onLogout }) {
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCard}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Send ETH</h2>
+              <h2 className={styles.modalTitle}>Send {currentNetwork?.symbol}</h2>
               <button 
                 onClick={() => {
                   setIsSendModalOpen(false);
@@ -427,7 +492,7 @@ export default function Dashboard({ onLogout }) {
                 </div>
 
                 <div className={styles.inputGroup}>
-                  <label className={styles.modalLabel} htmlFor="amount">Amount (ETH)</label>
+                  <label className={styles.modalLabel} htmlFor="amount">Amount ({currentNetwork?.symbol})</label>
                   <input
                     className={`${styles.modalInput} ${txError && parseFloat(sendAmount) > parseFloat(balance) ? styles.modalInputError : ""}`}
                     id="amount"
@@ -464,13 +529,14 @@ export default function Dashboard({ onLogout }) {
               <div className={styles.statusContainer}>
                 <div className={styles.statusSpinner} />
                 <h3 className={styles.statusText}>Sending Transaction...</h3>
-                <p className={styles.statusSubText}>Broadcasting to Sepolia network and waiting for 1 block confirmation.</p>
+                <p className={styles.statusSubText}>Broadcasting to {currentNetwork?.name} network and waiting for 1 block confirmation.</p>
                 {txHash && (
                   <a 
-                    href={`https://sepolia.etherscan.io/tx/${txHash}`} 
+                    href={`${currentNetwork?.explorerUrl}/tx/${txHash}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className={styles.txLink}
+                    style={{ fontSize: "0.85rem", marginTop: "1rem", display: "inline-block", color: "var(--color-primary)" }}
                   >
                     View Tx: {txHash.substring(0, 10)}...{txHash.substring(txHash.length - 8)}
                   </a>
@@ -484,15 +550,15 @@ export default function Dashboard({ onLogout }) {
                   <CheckCircle2 size={48} />
                 </div>
                 <h3 className={styles.statusText}>Transaction Confirmed!</h3>
-                <p className={styles.statusSubText}>Your transaction has been successfully mined on Sepolia.</p>
+                <p className={styles.statusSubText}>Your transaction has been successfully mined on {currentNetwork?.name}.</p>
                 {txHash && (
                   <a 
-                    href={`https://sepolia.etherscan.io/tx/${txHash}`} 
+                    href={`${currentNetwork?.explorerUrl}/tx/${txHash}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className={styles.txLink}
                   >
-                    View on Etherscan
+                    View on Explorer
                   </a>
                 )}
                 <button 
@@ -525,6 +591,59 @@ export default function Dashboard({ onLogout }) {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {isReceiveModalOpen && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalCard}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Receive Funds</h2>
+              <button 
+                onClick={() => setIsReceiveModalOpen(false)} 
+                className={styles.modalCloseBtn}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ color: "var(--color-body-text)", fontSize: "0.95rem", margin: "0 0 1rem 0" }}>
+                  Scan the QR code or copy the address below to receive tokens on {currentNetwork?.name}.
+                </p>
+                <div style={{ background: "white", padding: "1rem", borderRadius: "1rem", display: "inline-block", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" }}>
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${displayAddress}`} alt="Wallet QR Code" style={{ display: "block" }} />
+                </div>
+              </div>
+              
+              <div style={{ width: "100%" }}>
+                <label className={styles.modalLabel}>Your Wallet Address</label>
+                <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                  <input
+                    type="text"
+                    readOnly
+                    value={displayAddress}
+                    style={{ flexGrow: 1, padding: "0.75rem 1rem", backgroundColor: "var(--color-canvas)", border: "1px solid var(--color-hairline)", borderRadius: "0.5rem", color: "var(--color-ink)", fontSize: "0.85rem", fontFamily: "monospace" }}
+                  />
+                  <button 
+                    onClick={handleCopy}
+                    style={{ padding: "0 1rem", backgroundColor: "var(--color-surface-container)", border: "1px solid var(--color-hairline)", borderRadius: "0.5rem", color: "var(--color-ink)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    {copied ? <Check size={18} /> : <Copy size={18} />}
+                  </button>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setIsReceiveModalOpen(false)} 
+                className={styles.doneBtn}
+                style={{ width: "100%", padding: "1rem", backgroundColor: "var(--color-primary)", color: "var(--color-surface)", border: "none", borderRadius: "0.5rem", fontWeight: "600", cursor: "pointer", marginTop: "1rem" }}
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}

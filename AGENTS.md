@@ -65,12 +65,65 @@ Protect the private key and persist credentials on the user's device.
 
 ---
 
-## Phase 4: Multi-Chain & Advanced UI
-Expand support for multiple chains and token assets.
+## Phase 5: Connect dApps
+Enable the wallet to act as a Web3 provider so external dApps can interact with it.
 
 ### Steps:
-1. **Network Selection**:
-   - Add network configuration list (Ethereum, Polygon, Arbitrum) and RPC switcher.
-2. **Custom Token & NFT Support**:
-   - Display ERC-20 tokens and NFT metadata.
-   - Integrate token balance fetching via `ethers.Contract`.
+1. **Window Provider Injection:**
+   - Create a global `window.ethereum` mock object to intercept standard JSON-RPC calls.
+   - Implement the `eth_requestAccounts` method to trigger a connection prompt modal.
+2. **Connection Approval Modal:**
+   - Build a UI modal in the dashboard that displays the requesting dApp's origin and URL.
+   - Add "Approve" and "Reject" buttons.
+   - Store approved dApp origins in `localStorage`.
+3. **Message & Transaction Signing:**
+   - Implement `personal_sign` and `eth_sendTransaction` JSON-RPC handlers.
+   - Build confirmation modals for both methods so the user can review the raw data/transaction before signing with their decrypted `ethers.Wallet`.
+
+---
+
+## Phase 6: Multi-Chain Support
+Expand the wallet from a single Sepolia testnet connection to a dynamic multi-chain environment.
+
+### Steps:
+1. **Network Configuration State:**
+   - Create a central `NETWORK_CONFIG` object mapping Chain IDs to RPC URLs, Block Explorers, and Native Currency symbols (e.g., Ethereum Mainnet, Polygon, Arbitrum).
+2. **Dynamic Provider Switching:**
+   - Update `WalletContext` to maintain a `currentNetwork` state.
+   - Automatically re-instantiate `ethers.JsonRpcProvider` when the user switches networks.
+3. **Network Switcher UI:**
+   - Add a dropdown menu in the Dashboard header.
+   - Display the current network and its connection status (green/red dot indicator).
+   - Re-fetch the native balance (ETH/MATIC) upon network switch.
+
+---
+
+## Phase 7: Assets (Tokens & Portfolio)
+
+### Steps:
+1. **Custom Token Import:**
+   - Create an "Import Token" UI flow where the user pastes an ERC-20 contract address.
+   - Automatically query the contract for its `symbol()` and `decimals()` via `ethers.Contract`.
+2. **Persistent Asset List:**
+   - Store the user's custom token list in `localStorage` mapped by network chain ID.
+   - Map over these tokens in the Dashboard `useEffect` to fetch live balances concurrently.
+3. **NFT Metadata Viewing (ERC-721):**
+   - Add a new "NFTs" tab in the dashboard.
+   - Fetch ERC-721 `tokenURI` data, parse the JSON metadata, and display the image grid.
+
+---
+
+## Phase 8: Advanced Features
+Introduce complex decentralized integrations directly within the wallet interface.
+
+### Steps:
+1. **In-Wallet Swaps (DEX Aggregator):**
+   - Integrate the 0x API or Uniswap V3 SDK.
+   - Build a Swap UI component (Token In -> Token Out) with slippage settings.
+   - Fetch live quotes and build the raw swap transaction for the user to sign.
+2. **Hardware Wallet Support (Ledger):**
+   - Integrate `@ledgerhq/hw-app-eth` and WebHID.
+   - Build a specialized flow to derive addresses from a Ledger device instead of the local keystore.
+3. **QR Scanner Integration:**
+   - Implement a mobile-friendly camera component using `react-qr-reader`.
+   - Allow users to scan QR codes to auto-fill recipient addresses in the Send modal.
