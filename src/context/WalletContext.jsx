@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { NETWORKS, DEFAULT_NETWORK } from "../utils/networks";
 
 const WalletContext = createContext(null);
 
@@ -13,18 +14,23 @@ export function WalletProvider({ children }) {
   const [isLocked, setIsLocked] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
   const [provider, setProvider] = useState(null);
+  const [currentNetwork, setCurrentNetwork] = useState(NETWORKS[DEFAULT_NETWORK]);
 
   // Initialize provider and check for existing keystore
   useEffect(() => {
     try {
-      const rpcUrl = "https://ethereum-sepolia-rpc.publicnode.com";
-      const prov = new ethers.JsonRpcProvider(rpcUrl);
+      const prov = new ethers.JsonRpcProvider(currentNetwork.rpcUrl);
       setProvider(prov);
+      
+      // Update wallet's provider if wallet exists
+      if (wallet && typeof wallet.connect === 'function') {
+        setWallet(wallet.connect(prov));
+      }
 
       if (typeof window !== "undefined") {
         const keystore = localStorage.getItem("aura_wallet_keystore");
         const savedAddress = localStorage.getItem("aura_wallet_address");
-        if (keystore && savedAddress) {
+        if (keystore && savedAddress && !hasWallet) {
           setHasWallet(true);
           setIsLocked(true);
           setAddress(savedAddress);
@@ -33,7 +39,13 @@ export function WalletProvider({ children }) {
     } catch (error) {
       console.error("Failed to initialize wallet provider/storage:", error);
     }
-  }, []);
+  }, [currentNetwork.rpcUrl]);
+
+  const switchNetwork = (chainId) => {
+    if (NETWORKS[chainId]) {
+      setCurrentNetwork(NETWORKS[chainId]);
+    }
+  };
 
   // Fetch balance periodically if we have an address
   useEffect(() => {
@@ -179,6 +191,8 @@ export function WalletProvider({ children }) {
         isLocked,
         hasWallet,
         provider,
+        currentNetwork,
+        switchNetwork,
         encryptAndSaveWallet,
         unlockWallet,
         lockWallet,
