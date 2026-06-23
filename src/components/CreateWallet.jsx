@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useWallet } from "../context/WalletContext";
+import { ethers } from "ethers";
 import {
   Copy,
   Check,
@@ -16,15 +17,24 @@ import styles from "../styles/CreateWallet.module.css";
 
 export default function CreateWallet({ onBack, onComplete }) {
   const [copied, setCopied] = useState(false);
+  const [step, setStep] = useState("phrase"); // 'phrase' | 'password'
+  const [tempWallet, setTempWallet] = useState(null);
   const [phrase, setPhrase] = useState([]);
-  const { generateNewWallet } = useWallet();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isEncrypting, setIsEncrypting] = useState(false);
 
+  const { encryptAndSaveWallet } = useWallet();
+
+  // Generate the wallet locally on mount
   useEffect(() => {
     try {
-      const result = generateNewWallet();
-      setPhrase(result.phrase.split(" "));
+      const wallet = ethers.Wallet.createRandom();
+      setTempWallet(wallet);
+      setPhrase(wallet.mnemonic.phrase.split(" "));
     } catch (err) {
-      console.error(err);
+      console.error("Failed to generate random wallet:", err);
     }
   }, []);
 
@@ -46,6 +56,168 @@ export default function CreateWallet({ onBack, onComplete }) {
     element.click();
     document.body.removeChild(element);
   };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setIsEncrypting(true);
+    setError("");
+
+    // Timeout allows DOM state to update and render spinner before CPU-heavy scrypt runs
+    setTimeout(async () => {
+      try {
+        await encryptAndSaveWallet(tempWallet, password);
+        onComplete();
+      } catch (err) {
+        console.error(err);
+        setError("Failed to secure and encrypt wallet. Please try again.");
+        setIsEncrypting(false);
+      }
+    }, 100);
+  };
+
+  if (isEncrypting) {
+    return (
+      <div className={styles.wrapper}>
+        <main className={styles.main} style={{ justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem", textAlign: "center" }}>
+            <div style={{
+              width: "3.5rem",
+              height: "3.5rem",
+              border: "3px solid var(--color-hairline)",
+              borderTopColor: "var(--color-ink)",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite"
+            }} />
+            <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "var(--color-ink)", margin: 0 }}>Securing Your Wallet</h2>
+            <p style={{ color: "var(--color-body-text)", maxWidth: "300px", margin: 0, fontSize: "0.9rem", lineHeight: "1.5" }}>
+              Encrypting your private keys using PBKDF2/scrypt key derivation. This will take a few seconds...
+            </p>
+          </div>
+        </main>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (step === "password") {
+    return (
+      <div className={styles.wrapper}>
+        <main className={styles.main}>
+          <section className={styles.secretPanel}>
+            <div className={styles.headerGroup}>
+              <h1 className={styles.title}>Create Password</h1>
+              <p className={styles.description}>
+                This password will encrypt your recovery phrase on this device. Aura cannot recover this password if you lose it.
+              </p>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "420px", marginTop: "1rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <label style={{ fontSize: "0.875rem", fontWeight: "600", color: "var(--color-ink)" }} htmlFor="new-password">
+                  New Password (min. 8 characters)
+                </label>
+                <input
+                  id="new-password"
+                  type="password"
+                  placeholder="Enter secure password"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                  style={{
+                    width: "100%",
+                    padding: "0.875rem 1rem",
+                    border: "1px solid var(--color-hairline)",
+                    borderRadius: "0.5rem",
+                    backgroundColor: "var(--color-canvas)",
+                    color: "var(--color-ink)",
+                    fontSize: "0.95rem",
+                    boxSizing: "border-box"
+                  }}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <label style={{ fontSize: "0.875rem", fontWeight: "600", color: "var(--color-ink)" }} htmlFor="confirm-password">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Repeat your password"
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setError(""); }}
+                  style={{
+                    width: "100%",
+                    padding: "0.875rem 1rem",
+                    border: "1px solid var(--color-hairline)",
+                    borderRadius: "0.5rem",
+                    backgroundColor: "var(--color-canvas)",
+                    color: "var(--color-ink)",
+                    fontSize: "0.95rem",
+                    boxSizing: "border-box"
+                  }}
+                  required
+                />
+              </div>
+
+              {error && (
+                <p style={{ color: "red", fontSize: "0.825rem", margin: 0 }}>
+                  {error}
+                </p>
+              )}
+
+              <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+                <button
+                  type="button"
+                  onClick={() => { setStep("phrase"); setError(""); }}
+                  className={styles.secondaryActionBtn}
+                  style={{ width: "100px", justifyContent: "center" }}
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  className={styles.primaryActionBtn}
+                  style={{ flexGrow: 1 }}
+                  disabled={!password || !confirmPassword}
+                >
+                  Create Wallet
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <aside className={styles.sidePanel}>
+            <div className={styles.warningCard}>
+              <div className={styles.warningCardHeader}>
+                <AlertTriangle size={18} strokeWidth={2} />
+                <h3 className={styles.warningCardTitle}>
+                  Protect Your Password
+                </h3>
+              </div>
+              <p className={styles.warningCardText}>
+                If you forget this password, you must use your 12-word seed phrase to restore your wallet. Store both in a secure place.
+              </p>
+            </div>
+          </aside>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -93,7 +265,7 @@ export default function CreateWallet({ onBack, onComplete }) {
                 Export TXT
               </button>
             </div>
-            <button onClick={onComplete} className={styles.primaryActionBtn}>
+            <button onClick={() => setStep("password")} className={styles.primaryActionBtn}>
               I saved my phrase
               <ArrowRight size={16} />
             </button>

@@ -448,3 +448,225 @@
   color: var(--color-ink);
   transform: scale(1.1);
 }
+
+/* ── Send Transaction Modal ── */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modalCard {
+  background-color: var(--color-canvas, #ffffff);
+  border: 1px solid var(--color-hairline);
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 480px;
+  padding: 2.25rem;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: var(--color-mute);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modalCloseBtn:hover {
+  background-color: var(--color-surface-container);
+  color: var(--color-ink);
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modalLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.modalInput {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 0.5rem;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.modalInputError {
+  border-color: var(--color-destructive, #ef4444);
+}
+
+.modalInputError:focus {
+  border-color: var(--color-destructive, #ef4444);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+.errorText {
+  color: var(--color-destructive, #ef4444);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.submitBtn {
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submitBtn:hover {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Transaction Status Card ── */
+.statusContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.statusSpinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid var(--color-surface-container);
+  border-top-color: var(--color-ink);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.statusIconSuccess {
+  color: #10b981;
+}
+
+.statusIconError {
+  color: #ef4444;
+}
+
+.statusText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.statusSubText {
+  font-size: 0.875rem;
+  color: var(--color-mute);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.txLink {
+  color: #3b82f6;
+  text-decoration: none;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.825rem;
+  word-break: break-all;
+  padding: 0.5rem;
+  background-color: var(--color-surface-container);
+  border-radius: 0.25rem;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.txLink:hover {
+  text-decoration: underline;
+}
+
+.doneBtn {
+  width: 100%;
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
