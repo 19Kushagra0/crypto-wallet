@@ -1,22 +1,50 @@
 "use client";
 
-import { useState } from "react";
-import { Copy, Check, Download, ArrowRight, AlertTriangle, PenLine, CloudOff, EyeOff } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useWallet } from "../context/WalletContext";
+import {
+  Copy,
+  Check,
+  Download,
+  ArrowRight,
+  AlertTriangle,
+  PenLine,
+  CloudOff,
+  EyeOff,
+} from "lucide-react";
 import styles from "../styles/CreateWallet.module.css";
 
 export default function CreateWallet({ onBack, onComplete }) {
   const [copied, setCopied] = useState(false);
+  const [phrase, setPhrase] = useState([]);
+  const { generateNewWallet } = useWallet();
 
-  // Mock generated phrase for UI phase
-  const mockPhrase =
-    "abandon ability able about above absent absorb abstract absurd abuse access accident".split(
-      " ",
-    );
+  useEffect(() => {
+    try {
+      const result = generateNewWallet();
+      setPhrase(result.phrase.split(" "));
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(mockPhrase.join(" "));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (phrase.length > 0) {
+      navigator.clipboard.writeText(phrase.join(" "));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleExportTXT = () => {
+    if (phrase.length === 0) return;
+    const element = document.createElement("a");
+    const file = new Blob([phrase.join(" ")], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = "aura-wallet-recovery-phrase.txt";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   return (
@@ -26,9 +54,7 @@ export default function CreateWallet({ onBack, onComplete }) {
         {/* 2/3 Main Panel: Secret Phrase Grid */}
         <section className={styles.secretPanel}>
           <div className={styles.headerGroup}>
-            <h1 className={styles.title}>
-              Secret Recovery Phrase
-            </h1>
+            <h1 className={styles.title}>Secret Recovery Phrase</h1>
             <p className={styles.description}>
               Write down these 12 words in exact order. This is the only way to
               recover your account if you lose access to this device.
@@ -38,44 +64,42 @@ export default function CreateWallet({ onBack, onComplete }) {
           <div className={styles.gridContainer}>
             {/* Atmospheric Mesh behind grid */}
             <div className={styles.meshBackground} />
-            
-            {mockPhrase.map((word, index) => (
+
+            {phrase.map((word, index) => (
               <div key={index} className={styles.wordBox}>
                 <span className={styles.wordIndex}>
-                  {(index + 1).toString().padStart(2, '0')}
+                  {(index + 1).toString().padStart(2, "0")}
                 </span>
-                <span className={styles.wordValue}>
-                  {word}
-                </span>
+                <span className={styles.wordValue}>{word}</span>
               </div>
             ))}
           </div>
-          
+
           {/* Actions */}
           <div className={styles.actionsRow}>
             <div className={styles.secondaryActions}>
-              <button 
+              <button
                 onClick={handleCopy}
                 className={styles.secondaryActionBtn}
               >
                 {copied ? <Check size={15} /> : <Copy size={15} />}
                 {copied ? "Copied!" : "Copy to clipboard"}
               </button>
-              <button className={styles.secondaryActionBtn}>
+              <button
+                onClick={handleExportTXT}
+                className={styles.secondaryActionBtn}
+              >
                 <Download size={15} />
                 Export TXT
               </button>
             </div>
-            <button 
-              onClick={onComplete}
-              className={styles.primaryActionBtn}
-            >
+            <button onClick={onComplete} className={styles.primaryActionBtn}>
               I saved my phrase
               <ArrowRight size={16} />
             </button>
           </div>
         </section>
-        
+
         {/* 1/3 Side Panel: Security Guidance */}
         <aside className={styles.sidePanel}>
           {/* Warning Card */}
@@ -91,12 +115,10 @@ export default function CreateWallet({ onBack, onComplete }) {
               can access your funds.
             </p>
           </div>
-          
+
           {/* Guidance List */}
           <div className={styles.guidanceCard}>
-            <h4 className={styles.guidanceTitle}>
-              Best Practices
-            </h4>
+            <h4 className={styles.guidanceTitle}>Best Practices</h4>
             <ul className={styles.guidanceList}>
               <li className={styles.guidanceItem}>
                 <PenLine size={16} className={styles.guidanceIcon} />
