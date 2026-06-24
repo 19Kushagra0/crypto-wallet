@@ -38,7 +38,7 @@ export default function Onboarding() {
           </Link>
           <div className={styles.cardFooterText}>
             <span className={styles.estTime}>
-              EST. TIME: ~2 MIN
+              EST. TIME: ~FEW SEC
             </span>
           </div>
         </div>
