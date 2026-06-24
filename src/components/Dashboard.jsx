@@ -83,6 +83,16 @@ export default function Dashboard({ onLogout }) {
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [isQuoting, setIsQuoting] = useState(false);
 
+  // Sync swap input token with active network native token
+  useEffect(() => {
+    if (currentNetwork?.symbol) {
+      setSwapTokenIn(currentNetwork.symbol);
+      setSwapTokenOut("");
+      setSwapAmountIn("");
+      setSwapAmountOut("");
+    }
+  }, [currentNetwork]);
+
   // Fetch Swap Quotes
   useEffect(() => {
     if (!swapAmountIn || !swapTokenOut || swapTokenIn === swapTokenOut) {
