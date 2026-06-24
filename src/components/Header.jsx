@@ -168,14 +168,21 @@ export default function Header() {
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
             <div className={styles.modalIconContainer}>
-              <div className={styles.modalIconWrapper}>
-                <ShieldAlert size={28} />
+              <div className={styles.modalIconOuter}>
+                <div className={styles.modalIconInner}>
+                  <ShieldAlert size={24} />
+                </div>
               </div>
             </div>
             <h2 className={styles.modalTitle}>Reset Aura Wallet</h2>
             <p className={styles.modalText}>
-              Are you sure you want to reset your wallet? This will <strong>permanently delete</strong> your keys from this device. You can only restore access using your 12-word recovery phrase.
+              Are you sure you want to reset? This action is irreversible and will remove all wallet data from this device.
             </p>
+            <div className={styles.warningAlertBox}>
+              <p className={styles.warningAlertText}>
+                <strong>Warning:</strong> You can only restore access using your 12-word recovery phrase. If you don't have it saved, your funds will be <strong>lost forever</strong>.
+              </p>
+            </div>
             <div className={styles.modalActions}>
               <button 
                 onClick={() => setIsResetOpen(false)}
@@ -187,7 +194,7 @@ export default function Header() {
                 onClick={handleReset}
                 className={styles.btnConfirm}
               >
-                Yes, Reset
+                Permanently Reset
               </button>
             </div>
           </div>
