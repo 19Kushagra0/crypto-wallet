@@ -8,6 +8,7 @@ import {
   Check,
   Download,
   ArrowRight,
+  ArrowLeft,
   AlertTriangle,
   PenLine,
   CloudOff,
@@ -250,6 +251,13 @@ export default function CreateWallet({ onBack, onComplete }) {
           {/* Actions */}
           <div className={styles.actionsRow}>
             <div className={styles.secondaryActions}>
+              <button
+                onClick={onBack}
+                className={styles.secondaryActionBtn}
+              >
+                <ArrowLeft size={15} />
+                Back
+              </button>
               <button
                 onClick={handleCopy}
                 className={styles.secondaryActionBtn}
