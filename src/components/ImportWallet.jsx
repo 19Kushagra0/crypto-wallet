@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useWallet } from "../context/WalletContext";
 import { ethers } from "ethers";
-import { Key, Shield, AlertTriangle, ArrowRight } from "lucide-react";
+import { Key, Shield, AlertTriangle, ArrowRight, ArrowLeft } from "lucide-react";
 import styles from "../styles/ImportWallet.module.css";
 
 export default function ImportWallet({ onBack, onComplete }) {
@@ -228,7 +228,8 @@ export default function ImportWallet({ onBack, onComplete }) {
                   type="button"
                   onClick={onBack}
                 >
-                  Cancel
+                  <ArrowLeft size={16} />
+                  Back
                 </button>
                 <button
                   className={styles.btnSubmit}
