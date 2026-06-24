@@ -74,29 +74,36 @@ export default function UnlockWallet() {
     <main className={styles.main} style={{ justifyContent: "center", alignItems: "center" }}>
       {/* Reset Confirmation Modal */}
       {isResetModalOpen && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
-          <div style={{ backgroundColor: "var(--color-canvas)", borderRadius: "1rem", padding: "2rem", maxWidth: "400px", width: "100%", boxShadow: "0 10px 25px rgba(0,0,0,0.1)", border: "1px solid var(--color-hairline)" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
-              <div style={{ width: "3rem", height: "3rem", borderRadius: "50%", backgroundColor: "rgba(239, 68, 68, 0.1)", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <ShieldAlert size={24} />
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <div className={styles.modalIconContainer}>
+              <div className={styles.modalIconOuter}>
+                <div className={styles.modalIconInner}>
+                  <ShieldAlert size={24} />
+                </div>
               </div>
             </div>
-            <h2 style={{ textAlign: "center", margin: "0 0 1rem 0", fontSize: "1.25rem", color: "var(--color-primary)" }}>Reset Wallet</h2>
-            <p style={{ textAlign: "center", margin: "0 0 1.5rem 0", color: "var(--color-body-text)", fontSize: "0.95rem", lineHeight: 1.5 }}>
-              Are you sure you want to reset your wallet? This will <strong>permanently delete</strong> your keys from this device. You can only restore access using your 12-word recovery phrase.
+            <h2 className={styles.modalTitle}>Reset Aura Wallet</h2>
+            <p className={styles.modalText}>
+              Are you sure you want to reset? This action is irreversible and will remove all wallet data from this device.
             </p>
-            <div style={{ display: "flex", gap: "1rem" }}>
+            <div className={styles.warningAlertBox}>
+              <p className={styles.warningAlertText}>
+                <strong>Warning:</strong> You can only restore access using your 12-word recovery phrase. If you don't have it saved, your funds will be <strong>lost forever</strong>.
+              </p>
+            </div>
+            <div className={styles.modalActions}>
               <button 
                 onClick={() => setIsResetModalOpen(false)}
-                style={{ flex: 1, padding: "0.75rem", backgroundColor: "var(--color-surface-container)", color: "var(--color-ink)", border: "1px solid var(--color-hairline)", borderRadius: "0.5rem", fontWeight: "600", cursor: "pointer" }}
+                className={styles.btnCancelModal}
               >
                 Cancel
               </button>
               <button 
                 onClick={confirmReset}
-                style={{ flex: 1, padding: "0.75rem", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "600", cursor: "pointer" }}
+                className={styles.btnConfirmModal}
               >
-                Yes, Reset
+                Permanently Reset
               </button>
             </div>
           </div>
